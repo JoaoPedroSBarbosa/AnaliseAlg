@@ -1,6 +1,7 @@
 import time
+import random
 
-# com memoização
+# (com memoização)
 def CorteBarrasMenor(P, n):
     LucrosMax = [0] * (n + 1)
     return CorteBarrasAux(P, n, LucrosMax)
@@ -23,41 +24,57 @@ def CorteBarrasAux(P, n, LucrosMax):
     LucrosMax[n] = lucromax
     return lucromax
 
-# usando recursão 
+# abordagem iterativa
 def CorteBarrasItem(P, n):
     lmax = [0] * (n + 1)
-
     lmax[1] = P[0]
 
     for j in range(2, n + 1):
         lucromax = P[j - 1]
-
         for i in range(1, j):
             lucro = P[i - 1] + lmax[j - i]
             if lucro > lucromax:
-                    lucromax = lucro
-
+                lucromax = lucro
         lmax[j] = lucromax
 
     return lmax[n]
 
+# Função para gerar entradas aleatórias e calcular o tempo médio de execução
+def compara_algoritmos(max_tamanho, m):
+    tamanhos = list(range(1, max_tamanho + 1))  
+    tempos_memo = []
+    tempos_item = []
 
-P = [1, 5, 8, 9, 10, 17, 17, 20]  # Lucro para tamanhos 1, 2, 3, 4, 5, 6, 7, 8
-n = len(P)  # Tamanho da barra inicial
+    for n in tamanhos:
+        tempo_memo = 0
+        tempo_item = 0
 
-# Medindo o tempo de execução da solução com memoização
-inicio_memo = time.time()
-lucro_maximo_memo = CorteBarrasMenor(P, n)
-fim_memo = time.time()
+        for _ in range(m):
+            # Gera uma lista aleatória de lucros para tamanho n
+            P = [random.randint(1, 100) for _ in range(n)]
 
-# Medindo o tempo de execução da solução recursiva
-inicio_rec = time.time()
-lucro_maximo_rec = CorteBarrasItem(P, n)
-fim_rec = time.time()
+            # Tempo de execução para memoização
+            inicio_memo = time.time()
+            CorteBarrasMenor(P, n)
+            fim_memo = time.time()
+            tempo_memo += fim_memo - inicio_memo
 
-# Exibindo os resultados e os tempos
-print(f'O lucro máximo (memoização) é: {lucro_maximo_memo}')
-print(f'Tempo de execução (memoização): {fim_memo - inicio_memo:.6f} segundos')
+            # Tempo de execução para abordagem iterativa
+            inicio_item = time.time()
+            CorteBarrasItem(P, n)
+            fim_item = time.time()
+            tempo_item += fim_item - inicio_item
 
-print(f'O lucro máximo (recursão) é: {lucro_maximo_rec}')
-print(f'Tempo de execução (recursão): {fim_rec - inicio_rec:.6f} segundos')
+        # Calcula o tempo médio
+        tempos_memo.append(tempo_memo / m)
+        tempos_item.append(tempo_item / m)
+
+    # Exibindo resultados
+    for i, n in enumerate(tamanhos):
+        print(f"Tamanho: {n} | Tempo médio (memoização): {tempos_memo[i]:.6f}s | Tempo médio (iterativa): {tempos_item[i]:.6f}s")
+
+# teste
+max_tamanho = 20  
+m = 100  
+
+compara_algoritmos(max_tamanho, m)
