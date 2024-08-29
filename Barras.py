@@ -20,8 +20,10 @@ def CorteBarras(P, Resultado, n, Cortes):
     if Resultado[n] != 0:
         return Resultado[n]
 
-    if n == 0:
-        return 0
+    if n == 1:
+        Resultado[n] = P[n-1]
+        Cortes[n] = 1
+        return Resultado[n]
 
     lucroMax = P[n-1]  
     melhorCorte = n
