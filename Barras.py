@@ -1,30 +1,44 @@
 import time
 import random
+import matplotlib.pyplot as plt
 
-# com memoização
-def CorteBarrasMenor(P, n):
-    LucrosMax = [0] * (n + 1)
-    return CorteBarrasAux(P, n, LucrosMax)
+def criarPrecos(tam):
+    Precos = [0]
+    while len(Precos) < tam:
+        Precos.append(random.randint(1, tam * 10))
 
-def CorteBarrasAux(P, n, LucrosMax):
-    if LucrosMax[n] > 0:
-        return LucrosMax[n]
+    Precos.sort()
+    return Precos
 
-    if n == 1:
-        LucrosMax[n] = P[n-1]
-        return P[n-1]
+# Função de memoização 
+def CorteBarrasAux(P, n):
+    Resultado = [0] * (n + 1)
+    Cortes = [0] * (n + 1)
+    CorteBarras(P, Resultado, n, Cortes)
 
-    lucromax = P[n-1]
+def CorteBarras(P, Resultado, n, Cortes):
+    if Resultado[n] != 0:
+        return Resultado[n]
+
+    if n == 0:
+        return 0
+
+    lucroMax = P[n-1]  
+    melhorCorte = n
 
     for i in range(1, n):
-        lucro = P[i-1] + CorteBarrasAux(P, n - i, LucrosMax)
-        if lucro > lucromax:
-            lucromax = lucro
+        lucro = P[i-1] + CorteBarras(P, Resultado, n - i, Cortes)  
 
-    LucrosMax[n] = lucromax
-    return lucromax
+        if lucro > lucroMax:
+            lucroMax = lucro
+            melhorCorte = i
 
-# abordagem iterativa
+    Resultado[n] = lucroMax
+    Cortes[n] = melhorCorte
+
+    return Resultado[n]
+
+# Abordagem iterativa
 def CorteBarrasItem(P, n):
     lmax = [0] * (n + 1)
     lmax[1] = P[0]
@@ -39,7 +53,7 @@ def CorteBarrasItem(P, n):
 
     return lmax[n]
 
-# Função para gerar entradas aleatórias e calcular o tempo médio de execução
+# comparar os tempos de execução e gerar o gráfico
 def compara_algoritmos(max_tamanho, m):
     tamanhos = list(range(1, max_tamanho + 1))  
     tempos_memo = []
@@ -50,30 +64,41 @@ def compara_algoritmos(max_tamanho, m):
         tempo_item = 0
 
         for _ in range(m):
-            # Gera uma lista aleatória de lucros para tamanho n
-            P = [random.randint(1, 100) for _ in range(n)]
+            P = criarPrecos(n)
 
-            # Tempo de execução para memoização
+            # memoização
             inicio_memo = time.time()
-            CorteBarrasMenor(P, n)
+            CorteBarrasAux(P, n)
             fim_memo = time.time()
             tempo_memo += fim_memo - inicio_memo
 
-            # Tempo de execução para abordagem iterativa
+            # abordagem iterativa
             inicio_item = time.time()
             CorteBarrasItem(P, n)
             fim_item = time.time()
             tempo_item += fim_item - inicio_item
 
-        # Calcula o tempo médio
+        # tempo médio
         tempos_memo.append(tempo_memo / m)
         tempos_item.append(tempo_item / m)
 
-    # Exibindo resultados
+    # resultados
     for i, n in enumerate(tamanhos):
         print(f"Tamanho: {n} | Tempo médio (memoização): {tempos_memo[i]:.6f}s | Tempo médio (iterativa): {tempos_item[i]:.6f}s")
 
-# teste
+    # Gerando o gráfico 
+    plt.figure(figsize=(16, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(tamanhos, tempos_item, label='Iteração', marker='o')
+    plt.plot(tamanhos, tempos_memo, label='Memoização', marker='o')
+    plt.xlabel('Tamanho da Barra')
+    plt.ylabel('Tempo Médio (microssegundos)')
+    plt.legend(loc='lower right')
+    plt.title('Comparação Métodos Memoização e Iteração')
+    plt.grid(True)
+    plt.show()
+
+# Teste 
 max_tamanho = 20  
 m = 100  
 
