@@ -1,7 +1,7 @@
 import time
 import random
 
-# (com memoização)
+# com memoização
 def CorteBarrasMenor(P, n):
     LucrosMax = [0] * (n + 1)
     return CorteBarrasAux(P, n, LucrosMax)
